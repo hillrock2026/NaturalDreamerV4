@@ -1,0 +1,103 @@
+environmentName: CarRacing-v3
+runName: V4RunOfflineTask8B_R1
+seed: 1
+
+# Phases
+phase: phase1a  # phase1a | phase1b | phase2 | phase3
+phase1aSteps: 60000
+phase1bSteps: 200000
+phase2Steps: 60000
+phase3Steps: 100000
+checkpointInterval: 2000
+saveCheckpoints: true
+saveMetrics: true
+resume: false
+checkpointToLoad: ""
+
+# Data
+mode: offline          # train from a .npz dataset, no training-env interaction
+offlineDataPath: data/car-racing/car-racing-offline.npz
+evaluateCheckpoints: false  # no environment evaluation during offline training
+missingRelevantPolicy: error  # uniform | error (how to treat missing 'relevant' in .npz)
+actionLow: [-1.0, -1.0, -1.0]   # used in offline mode where no env is available
+actionHigh: [1.0, 1.0, 1.0]
+episodesBeforeStart: 5
+numInteractionEpisodes: 1
+numEvaluationEpisodes: 1
+
+dreamer:
+  batchSize: 16
+  batchLengthShort: 16
+  batchLengthLong: 64
+  contextLength: 48
+  longBatchEvery: 8
+  imaginationHorizon: 15
+  actionBins: 5
+
+  # Tokenizer
+  imageSize: 64
+  patchSize: 8
+  patchChannels: 32
+  tokenizer:
+    bottleneckTokens: 128
+    bottleneckDim: 16
+    latentTokens: 64
+    latentDim: 32
+    modelDim: 256
+    layers: 8
+    heads: 4
+    mlpRatio: 4
+    maskRatioMax: 0.9
+    lpipsWeight: 0.2
+    singleFrameProb: 0.3
+
+  # Dynamics
+  dynamics:
+    modelDim: 256
+    layers: 12
+    heads: 4
+    kvHeads: 2
+    registers: 4
+    actionTokens: 1
+    agentTokens: 2
+    tauBins: 9
+    stepBins: [0.25, 0.5, 1.0]
+    softCap: 50.0
+    dropout: 0.1
+
+  # Sampling
+  sampleSteps: 4
+  tauCtx: 0.1
+
+  # Agent
+  mtpLength: 8
+  discount: 0.997
+  lambda_: 0.95
+  pmpoAlpha: 0.5
+  pmpoBeta: 0.3
+
+  # Heads
+  twohot:
+    bins: 64
+    low: -5.0
+    high: 5.0
+  headHidden: 256
+
+  # Optimization
+  lr: 0.0001
+  phase2Lr: 0.00003
+  weightDecay: 0.01
+  gradientClip: 1.0
+  gradientNormType: 2
+  precision: fp32  # formal training precision; bf16 autocast is not implemented
+  lossNormDecay: 0.99
+
+  # Buffer
+  buffer:
+    capacity: 50000
+
+folderNames:
+  metricsFolder: metrics
+  plotsFolder: plots
+  checkpointsFolder: checkpoints
+  videosFolder: videos
